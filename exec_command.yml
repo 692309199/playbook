@@ -1,9 +1,12 @@
 ---
 - hosts: all
   gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
   vars:
       exec_command: ""
 
   tasks:
-  - name: exec the command
-    shell: exec {{ exec_command }} 
+  - name: 执行命令 {{ exec_command }}
+    shell: exec {{ exec_command }}

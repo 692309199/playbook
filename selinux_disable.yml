@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 永久关闭selinux
+    #shell: sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+    lineinfile: dest=/etc/selinux/config regexp='^SELINUX=' line='SELINUX=disabled'
+
+  - name: 临时关闭selinux
+    shell: setenforce 0

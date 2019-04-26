@@ -12,4 +12,5 @@
   - name: 停止 network
     #service: name=network state=stopped
     #async: 10
-    shell: systemctl stop network 
+    shell: systemctl stop network
+    async: 10 
