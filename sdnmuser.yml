@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: create sdnmuser group
+    group: name=sdnmuser
+
+  - name: create sdnmuser user
+    user: name=sdnmuser  group=sdnmuser state=present

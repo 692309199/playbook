@@ -1,0 +1,30 @@
+---
+- hosts: all
+  gather_facts: no
+#  vars:
+#    public_key: ""
+
+  tasks:
+#  - name: 获取 public key
+#    shell: cat /home/sdnmuser/.ssh/id_rsa.pub
+#    connection: local
+#    register: public_key
+
+  - name: 获取 public key
+    shell: cat /home/sdnmuser/.ssh/id_rsa.pub
+#    connection: local
+    run_once: true
+    delegate_to: 192.168.126.128
+    register: public_key
+
+  - name: 创建.ssh 文件夹
+    shell: mkdir -p /home/sdnmuser/.ssh
+
+  - name: 配置 public_key
+    shell: echo {{ public_key.stdout }} >> /home/sdnmuser/.ssh/authorized_keys
+
+  - name: /home/sdnmuser/.ssh 文件夹授权
+    shell: chmod 700 /home/sdnmuser/.ssh && chmod 600 /home/sdnmuser/.ssh/authorized_keys
+
+  - name: 更改.ssh 文件夹用户/用户组
+    shell: chown -R  sdnmuser.sdnmuser /home/sdnmuser/.ssh

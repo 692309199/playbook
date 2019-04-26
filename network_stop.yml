@@ -1,0 +1,15 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 禁用 network
+    shell: /sbin/chkconfig network off
+
+  - name: 停止 network
+    #service: name=network state=stopped
+    #async: 10
+    shell: systemctl stop network 

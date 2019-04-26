@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: 创建文件
+      file:  path=/etc/yum.repos.d/RedHat7.3.repo   state=touch
+
+    - name: 正在清空repo文件内容
+      shell: echo "" > /etc/yum.repos.d/RedHat7.3.repo
+
+    - name: 配置标签
+      shell: echo "[RedHat7.3]" >> /etc/yum.repos.d/RedHat7.3.repo
+
+    - name: 配置repo name
+      shell: echo "name=repo for RedHat7.3" >> /etc/yum.repos.d/RedHat7.3.repo
+
+    - name: 配置baseurl
+      shell: echo "baseurl=http://132.122.137.3/RedHat/7/iso/RedHat7.3" >> /etc/yum.repos.d/RedHat7.3.repo
+
+    - name: 启用repo
+      shell: echo "enabled=1" >> /etc/yum.repos.d/RedHat7.3.repo
+
+    - name: 配置gpgcheck
+      shell: echo "gpgcheck=0" >> /etc/yum.repos.d/RedHat7.3.repo

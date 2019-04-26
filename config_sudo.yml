@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: no
+  vars:
+    user_name: ""
+
+  tasks:
+  - name: 配置 {{ user_name }} sudo 免密
+    shell: "echo {{ user_name }} '     ALL=(ALL)       NOPASSWD: ALL' > /etc/sudoers.d/{{ user_name }}"

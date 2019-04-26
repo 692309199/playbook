@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: no
+  vars:
+      exec_command: ""
+
+  tasks:
+  - name: exec the command
+    shell: exec {{ exec_command }} 
