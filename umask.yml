@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: "root"
+
+  tasks:
+  - name: 检测umask权限
+    shell: grep "umask 027" /etc/profile | wc -l
+    register: umask_code
+
+  - name: 配置umask
+    shell: echo "umask 027" >> /etc/profile
+    when: umask_code.stdout == "0"

@@ -1,0 +1,53 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 锁定非必要的用户
+    shell: passwd -l "{{ item }}"
+    with_items:
+      - bin
+      - daemon
+      - adm
+      - lp
+      - sync
+      - shutdown
+      - halt
+      - mail
+      - operator
+      - games
+      - ftp
+      - nobody
+      - systemd-bus-proxy
+      - systemd-network
+      - dbus
+      - polkitd
+      - tss
+      - postfix
+      - sshd
+
+  - name: 修改用户的域
+    shell: usermod -s /bin/false "{{ item }}"
+    with_items:
+      - bin
+      - daemon
+      - adm
+      - lp
+      - sync
+      - shutdown
+      - halt
+      - mail
+      - operator
+      - games
+      - ftp
+      - nobody
+      - systemd-bus-proxy
+      - systemd-network
+      - dbus
+      - polkitd
+      - tss
+      - postfix
+      - sshd

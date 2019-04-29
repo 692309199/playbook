@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 关闭非必要的端口
+    shell: chkconfig --list | grep 3:on | grep -vE "crond|sshd|network|rsyslog|sysstat" | awk '{print "chkconfig " $1 " off"}' | bash

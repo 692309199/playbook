@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: ""
+    group: ""
+  
+  tasks:
+  - name: delete user {{ username }}
+    user: name={{ username }} state=absent
+    when: username != ""
+
+  - name: delete group {{ group }}
+    group: name={{ group }} state=absent
+    when: group != "" 

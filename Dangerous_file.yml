@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 分发文件删除脚本
+    template: src=/data/scripts/shell/dangerous_file_delete.sh dest=/home/sdnmuser/dangerous_file_delete.sh
+
+  - name: 执行潜在危险文件删除脚本
+    shell: /bin/bash /home/sdnmuser/dangerous_file_delete.sh

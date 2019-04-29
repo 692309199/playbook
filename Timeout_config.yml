@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: "root"
+
+  tasks:
+  - name: 检测{{ username }}超时配置
+    shell: grep -i TMOUT /etc/profile | wc -l
+    register: root_count
+    when:  username == "root"
+
+  - name: 配置{{ username }} 超时
+    shell: echo "TMOUT=300" >> /etc/profile && echo "export TMOUT" >> /etc/profile && . /etc/profile
+    when: root_count.stdout == "0" and username == "root"

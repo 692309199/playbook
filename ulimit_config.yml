@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 检测是否已经配置ulimit
+    shell: grep nofile /etc/security/limits.conf | grep -v "#" | wc -l
+    register: check_count
+
+  - name: 如果配置nofile,重新修改为65535
+    lineinfile: dest=/etc/security/limits.conf regexp='nofile' line='* - nofile 65535' 
+    when: check_count.stdout != "0"
+
+  - name: 如果没有配置ulimit,配置nofile为65535
+    shell: echo "* - nofile 65535" >>  /etc/security/limits.conf

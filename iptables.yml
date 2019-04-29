@@ -1,0 +1,15 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    commands: ""
+ #       - "iptables -I INPUT -p tcp --dport 80 -j ACCEPT \n"
+ #       - "iptables -I INPUT -p tcp --dport 8080 -j ACCEPT \n"
+ #       - "iptables -I INPUT -p tcp --dport 10050 -j ACCEPT \n"
+  tasks:
+  - name: 配置iptables
+    shell: " {% for i in commands %} {{ i }} {% endfor %}"
+    when: commands != ""

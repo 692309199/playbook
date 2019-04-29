@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 禁用 profix
+    shell: systemctl disable postfix.service
+
+  - name: 停止 profix
+    shell: systemctl stop postfix.service

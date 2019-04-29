@@ -1,0 +1,28 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 检测telnet服务是否存在
+    shell: systemctl list-unit-files  | grep telnet | wc -l
+    register: telnet_count
+
+  - name: 检测配置文件是否存在
+    shell: ls -al /etc/xinetd.d/telnet | wc -l 
+    ignore_errors: True
+    register: file_count
+
+  - name: 关闭telnet
+    lineinfile: dest=/etc/xinetd.d/telnet   regexp='disable' line='disable=yes'
+    when: telnet_count.stdout != "0" and file_count.stdout != "0"
+
+  - name: 检测xinetd服务是否存在
+    shell: systemctl list-unit-files | grep xinetd  | wc -l
+    register: xinetd_count
+
+  - name: 重启xinetd服务
+    service: name=xinetd state=restarted
+    when: xinetd_count.stdout != "0"

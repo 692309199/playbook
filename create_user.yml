@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  vars:
+    group: "sdnmuser"
+    username: "sdnmuser"
+    password: "sendi@1234"
+  
+  tasks:
+  - name: create {{ group }} group
+    group: name={{ group }}
+
+  - name: create {{ usernme }} user
+    user: name={{ username }}  group={{ group }} state=present
+
+  - name: set password for user {{ username }}
+    shell: echo {{ username }}':'{{ password }} | chpasswd

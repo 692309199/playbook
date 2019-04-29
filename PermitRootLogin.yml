@@ -1,0 +1,16 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 备份 sshd_config 文件
+    shell: cp -p /etc/ssh/sshd_config /etc/ssh/sshd_config_bak
+
+  - name: 禁止 root 通过 ssh 登录
+    lineinfile: dest=/etc/ssh/sshd_config   regexp='^#PermitRootLogin yes' line='PermitRootLogin no'
+
+  - name: 重启sshd服务
+    service: name=sshd state=restarted
