@@ -1,0 +1,24 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    ntp_server: ""
+    username: ""
+
+  tasks:
+  - name: 检测是否已配置ntp服务器{{ ntp_server }}的计划任务
+    shell: grep "/usr/sbin/ntpdate {{ ntp_server }}" /var/spool/cron/{{ username }} | wc -l
+    register: ntp_server_count
+
+  - name: 配置ntp服务器{{ ntp_server }}的时间同步计划
+    cron: name="时间同步" user={{ username }} minute=* hour=*/2 day=* month=* weekday=* job="/usr/sbin/ntpdate {{ ntp_server }} >> /var/log/ntp.log 2>&1; /sbin/hwclock --systohc"
+    when: ntp_server_count.stdout == "0" and ntp_server != "" and username != ""
+
+  - name: 删除localtime
+    shell: cd /etc && rm -f localtime
+
+  - name: 软链/usr/share/zoneinfo/Asia/Shanghai 到/etc/localtime
+    shell: ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

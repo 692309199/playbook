@@ -1,0 +1,15 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: "sdnmuser"
+    group: "sdnmuser"
+    path: "/home/sdnmuser/.ssh"
+
+  tasks:
+  - name: 配置文件夹授权
+    file: path={{ path }}  owner={{ username }} group={{ group }} recurse=yes
+    when: username != "" and group != "" and path != ""

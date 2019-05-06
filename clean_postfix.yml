@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 定期清理邮件服务器临时文件 
+    shell: find /var/spool/postfix/maildrop/ -type f | xargs rm -f

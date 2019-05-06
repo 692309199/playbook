@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: ""
+
+  tasks:
+  - name: 从wheel组移除用户 {{ username }} 
+    shell: gpasswd -d {{ username }} wheel
+    when: username != ""

@@ -1,0 +1,35 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: "sdnmuser"
+#    password: "sdnmuser"
+    group: "sdnmuser"
+
+  tasks:
+  - name: GID_MIN检测 
+    shell: grep -v ^# /etc/login.defs |grep ""^GID_MIN""|awk '{print $2}'
+    register: GID_MIN_value
+
+  - name: GID_MAX检测
+    shell: grep -v ^# /etc/login.defs |grep ""^GID_MAX""|awk '{print $2}'
+    register: GID_MAX_value
+
+  - name: 合规用户组数量检查
+    shell: grep -v "oracle|sybase|postgres" /etc/passwd|awk -F':' '($4>='{{ GID_MIN_value.stdout }}' && $4<='{{ GID_MAX_value.stdout }}'){print $1}' | wc -l
+    register: group_count
+
+  - name: 备份文件/etc/group
+    shell: cp -p  /etc/group /etc/group_bak  
+    when: group_count.stdout == "0"
+
+  - name: 不存在合法用户组，则创建默认用户组{{ group }}
+    group: name={{ group }} 
+    when: group_count.stdout == "0"
+
+  - name: 分配用户
+    shell: usermod -g {{ group }} {{ username }}
+    when: group_count.stdout == "0"

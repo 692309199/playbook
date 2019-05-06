@@ -1,0 +1,27 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: "sdnmuser"
+    password: "sdnmuser"
+    group: "sdnmuser"
+
+  tasks:
+  - name: UID_MIN检测 
+    shell: grep -v ^# /etc/login.defs |grep "^UID_MIN"|awk '{print $2}'
+    register: UID_MIN_value
+
+  - name: UID_MAX检测
+    shell: grep -v ^# /etc/login.defs |grep "^UID_MAX"|awk '{print $2}'
+    register: UID_MAX_value
+
+  - name: 合规用户数量检查
+    shell: grep -v "oracle|sybase|postgres" /etc/passwd |awk -F':' '($3>='{{ UID_MIN_value.stdout }}' && $3<='{{ UID_MAX_value.stdout }}'){print $1}'| wc -l
+    register: user_count
+
+  - name: 不存在合法用户，则创建默认用户{{ sdnmuser }}
+    user: name={{ username }} password={{ password }} group={{ group }} createhome=yes  shell=/bin/bash
+    when: user_count.stdout == "0"

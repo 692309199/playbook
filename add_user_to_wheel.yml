@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    username: ""
+
+  tasks:
+  - name: 添加用户 {{ username }} 到wheel组
+    shell: usermod -G wheel {{ username }}
+    when: username != ""

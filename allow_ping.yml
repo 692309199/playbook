@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 禁止ping配置检测
+    shell: grep "^net.ipv4.icmp_echo_ignore_all = 0" /etc/sysctl.conf | wc -l
+    register: setting_count
+
+  - name: 开启允许ping配置
+    lineinfile: dest=/etc/sysctl.conf   regexp='^net.ipv4.icmp_echo_ignore_all.*' line='net.ipv4.icmp_echo_ignore_all = 0'
+    when: setting_count.stdout == "0"
+
+  - name: 配置生效
+    shell: sysctl -p
+    when: setting_count.stdout == "0"

@@ -1,0 +1,20 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    cfg_file: "/etc/pam.d/su"
+
+  tasks:
+    - name: 检测是否配置禁止非wheel组用户使用su
+      shell: grep "^auth           required        pam_wheel.so use_uid" {{ cfg_file }}  | wc -l
+      register: wheel_count
+
+    - name: 配置禁止非wheel组用户使用su
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='auth           required        pam_wheel.so use_uid' backup=yes
+      with_items:
+        - "^#auth           required.*"
+        - "^auth           required.*"
+      when: wheel_count.stdout == "0"

@@ -1,0 +1,32 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 检测 /etc/passwd 权限
+    shell: stat -c %a  /etc/passwd
+    register: passwd_mode
+
+  - name: 更改 /etc/passwd 权限 
+    file: path=/etc/passwd mode=644
+    when: passwd_mode.stdout > "644"
+
+  - name: 检测 /etc/group 权限
+    shell: stat -c %a  /etc/group
+    register: group_mode
+
+  - name: 更改 /etc/group 权限 
+    file: path=/etc/group mode=644
+    when: group_mode.stdout > "644"
+
+  - name: 检测 /etc/shadow 权限
+    shell: stat -c %a  /etc/shadow
+    register: shadow_mode
+
+  - name: 更改 /etc/shadow 权限 
+    file: path=/etc/shadow mode=644
+    when: shadow_mode.stdout > "644"
+

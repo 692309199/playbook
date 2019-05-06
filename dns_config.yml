@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    dns_server: ""
+    
+  tasks:
+  - name: 检测DNS服务器 {{ dns_server }} 是否已经存在
+    shell: grep "^nameserver" /etc/resolv.conf | grep {{ dns_server }}  | wc -l
+    register: dns_server_count
+
+  - name: 配置DNS服务器{{ dns_server }}
+    shell: echo "nameserver {{ dns_server }}" >>  /etc/resolv.conf
+    when: dns_server != "" and dns_server_count.stdout == "0"

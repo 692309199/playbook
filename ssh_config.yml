@@ -1,0 +1,96 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    cfg_file: "/etc/ssh/sshd_config"
+
+  tasks:
+    - name: 备份sshd_config文件
+      shell: cp -p {{ cfg_file }}{,_bak}
+
+    - name: 检测Protocol 2是否配置
+      shell: grep "^Protocol 2"  {{ cfg_file }} | wc -l
+      register: Protocol_count
+
+#    - name: 配置 Protocol 2
+#      shell: echo  'Protocol 2' >>{{ cfg_file }}
+#      when: Protocol_count.stdout == "0"
+    - name: 配置 Protocol 2
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='Protocol 2'
+      with_items:
+        - "^#Protocol.*"
+        - "^Protocol.*"
+
+    - name: 检测是否禁止root登入
+      shell: grep "^PermitRootLogin no" {{ cfg_file }}  | wc -l
+      register: PermitRootLogin_count
+
+    - name: 禁止 root 通过 ssh 登录
+      lineinfile: dest={{ cfg_file }}   regexp='^#PermitRootLogin yes' line='PermitRootLogin no'
+      when: PermitRootLogin_count.stdout == "0"
+
+    - name: 检测基于 GSSAPI 的用户认证
+      shell: grep "^GSSAPIAuthentication no" {{ cfg_file }}  | wc -l
+      register: GSSAPIAuthentication_count
+
+    - name: 配置基于 GSSAPI 的用户认证
+      lineinfile: dest={{ cfg_file }}   regexp='^GSSAPIAuthentication.*' line='GSSAPIAuthentication no'
+      when: GSSAPIAuthentication_count.stdout == "0"
+
+    - name: 检测UseDns配置
+      shell: grep "^UseDNS no" {{ cfg_file }}  | wc -l
+      register: UserDNS_count
+
+    - name: 配置UseDNS
+      lineinfile: dest={{ cfg_file }}   regexp='^#UseDNS.*' line='UseDNS no'
+      when: UserDNS_count.stdout == "0"
+
+    - name: 检测ssh端口配置
+      shell: grep "^Port 22" {{ cfg_file }}  | wc -l
+      register: ssh_port_count
+
+    - name: 配置ssh port 
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='Port 22'
+      with_items:
+        - "^#Port.*"
+        - "^Port.*"
+      when: ssh_port_count.stdout == "0"
+
+    - name: 检测空密码登入配置
+      shell: grep "^PermitEmptyPasswords no" {{ cfg_file }}  | wc -l
+      register: EmptyPasswords_count
+
+    - name: 禁止空密码登入配置
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='PermitEmptyPasswords no'
+      with_items:
+        - "^#PermitEmptyPasswords.*"
+        - "^PermitEmptyPasswords.*"
+      when: EmptyPasswords_count.stdout == "0"
+
+    - name: 检测超时断开配置
+      shell: grep "^ClientAliveInterval 300" {{ cfg_file }}  | wc -l
+      register: ClientAliveInterval_count
+
+    - name: 超时断开配置
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='ClientAliveInterval 300'
+      with_items:
+        - "^#ClientAliveInterval.*"
+        - "^ClientAliveInterval.*"
+      when: ClientAliveInterval_count.stdout == "0"
+
+    - name: 检测超时次数
+      shell: grep "^ClientAliveCountMax 3" {{ cfg_file }}  | wc -l
+      register: ClientAliveCountMax_count
+
+    - name: 超时次数配置
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='ClientAliveCountMax 3'
+      with_items:
+        - "^#ClientAliveCountMax.*"
+        - "^ClientAliveCountMax.*"
+      when: ClientAliveCountMax_count.stdout == "0"
+
+    - name: 重启sshd服务
+      service: name=sshd state=restarted

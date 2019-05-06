@@ -1,0 +1,20 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    cfg_file: "/etc/pam.d/su"
+
+  tasks:
+    - name: 检测root su 切换普通用户免密
+      shell: grep "^auth            sufficient      pam_rootok.so" {{ cfg_file }}  | wc -l
+      register: su_nopasswd_count
+
+    - name: 配置root su 切换普通用户免密
+      lineinfile: dest={{ cfg_file }}   regexp={{ item }} line='auth            sufficient      pam_rootok.so' backup=yes
+      with_items:
+        - "^#auth            sufficient.*"
+        - "^auth            sufficient.*"
+      when: su_nopasswd_count.stdout == "0"
