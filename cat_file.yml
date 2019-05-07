@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    file_path: ""
+
+  tasks:
+  - name: 文件浏览
+    shell: cat {{ file_path }}
+    when: file_path != ""

@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 分区查询
+    shell: df -h 
+
+  - name: 查看系统分区详细信息
+    shell: fdisk -l

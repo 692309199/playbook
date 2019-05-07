@@ -1,0 +1,16 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    src_file: "/data/software/rsync-3.1.2-4.el7.x86_64.rpm"
+    dest_file: "/opt/rsync-3.1.2-4.el7.x86_64.rpm"
+
+  tasks:
+  - name: 同步文件
+    copy: src={{ src_file }} dest={{ dest_file }}
+
+  - name: 安装rsync
+    yum: name={{ dest_file }} state=present

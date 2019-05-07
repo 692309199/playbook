@@ -9,6 +9,10 @@
     username: ""
 
   tasks:
+
+  - name: 安装ntpdate
+    yum: name=ntpdate state=present
+
   - name: 检测是否已配置ntp服务器{{ ntp_server }}的计划任务
     shell: grep "/usr/sbin/ntpdate {{ ntp_server }}" /var/spool/cron/{{ username }} | wc -l
     register: ntp_server_count

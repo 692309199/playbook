@@ -1,0 +1,15 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 检测/etc/shadow文件权限
+    shell: stat -c %a  /etc/shadow
+    register: shadow_mode
+
+  - name:  更改 /etc/shadow 权限 
+    file: path=/etc/shadow mode=600
+    when: shadow_mode.stdout != "600"

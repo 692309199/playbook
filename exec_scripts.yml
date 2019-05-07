@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    script_src_path: ""
+    script_dest_path: ""
+
+
+  tasks:
+  - name: 分发脚本
+    template: src={{ script_src_path }} dest={{ script_dest_path }}
+
+  - name: 执行脚本
+    shell: /bin/bash {{ script_dest_path }}

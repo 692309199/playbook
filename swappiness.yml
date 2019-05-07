@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 临时设置最大限度使用物理内存
+    shell: sysctl -w vm.swappiness=0
+
+  - name: 获取sysctl.conf配置
+    shell: grep -o '^vm.swappiness' /etc/sysctl.conf | wc -l
+    register: swappiness_count
+
+  - name: 配置永久使用最大限度使用物理内存
+    shell: echo "vm.swappiness = 0" >> /etc/sysctl.conf
+    when: swappiness_count.stdout == "0"

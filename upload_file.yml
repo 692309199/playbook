@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    src_file: ""
+    dest_file: ""
+
+  tasks:
+  - name: 同步文件
+    synchronize: src={{ src_file }} dest={{ dest_file }}
+    when: src_file != "" and  dest_file != "" 

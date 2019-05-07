@@ -1,0 +1,34 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+  - name: 获取硬盘信息
+    shell: lsblk  | grep disk | awk '{print $1}'
+
+  - name: 创建目录
+    shell: mkdir -p /srv/BigData/hadoop/data{1..10}
+
+  - name: 格式化硬盘
+    shell: echo "y\n" |mkfs.xfs -f /dev/sd{{ item.partition }} &>/dev/null  && echo "/dev/sd{{ item.partition }} /srv/BigData/hadoop/data{{ item.num }} xfs defaults,noatime 0 1"  >>  /etc/fstab
+    with_items:
+       - { partition: "b", num: "1" }
+       - { partition: "c", num: "2" }
+       - { partition: "d", num: "3" }
+       - { partition: "e", num: "4" }
+       - { partition: "f", num: "5" }
+       - { partition: "g", num: "6" }
+       - { partition: "h", num: "7" }
+       - { partition: "i", num: "8" }
+       - { partition: "j", num: "9" }
+       - { partition: "k", num: "10" }
+    ignore_errors: yes
+
+  - name: 重启挂载分区
+    shell: mount -a
+
+  - name: 查看分区信息
+    shell: df -h

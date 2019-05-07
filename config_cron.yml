@@ -1,0 +1,20 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    note: ""
+    username: ""
+    minute: "*"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: ""
+
+  tasks:
+  - name: 配置计划任务
+    cron: name={{ note }} user={{ username }} minute={{ minute }} hour={{ hour }} day={{ day }} month={{ month }} weekday={{ weekday }} job={{ job }}
+    when: username != "" and job != ""

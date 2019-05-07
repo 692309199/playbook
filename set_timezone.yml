@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    timezone: "Asia/Shanghai"
+
+  tasks:
+  - name: 检查文件是否存在
+    shell: ls /usr/share/zoneinfo/{{ timezone }} | wc -l
+    register: timezone_count
+
+
+  - name: 设置时区为Shanghai
+    shell: cp /usr/share/zoneinfo/{{ timezone }} /etc/localtime
+    when: timezone_count.stdout != "0"

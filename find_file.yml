@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    file_name: ""
+
+  tasks:
+  - name: 查找文件{{ file_name }}
+    shell: find / -name {{ file_name }}
+    when: file_name != ""

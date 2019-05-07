@@ -1,0 +1,12 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    arguments: "tnlp"
+
+  tasks:
+  - name: 查看netstat -{{ arguments }} 状态
+    shell: netstat -{{ arguments }}
