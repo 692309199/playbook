@@ -1,0 +1,26 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    login_conf: "/etc/pam.d/login"
+    limits_conf: "/etc/security/limits.conf"
+    nofile: "131072"
+    noproc: "131072"
+    memlock: "4194304"
+
+  tasks:
+    - name: 配置pam_limits.so模块加载
+      lineinfile: dest={{ login_conf }} regexp='^session required /lib64/security/pam_limits.so.*' line='session required /lib64/security/pam_limits.so'
+
+    - name: 配置进程的最大数目
+      lineinfile: dest={{ limits_conf }} regexp="^\*  -  noproc.*" line="*  -  noproc {{ noproc }}"
+
+    - name: 打开文件的最大数目
+      lineinfile: dest={{ limits_conf }} regexp="^\*  -  nofile.*" line="*  -  nofile {{ nofile }}"
+
+    - name: 最大锁定内存地址空间
+      lineinfile: dest={{ limits_conf }} regexp="^\*  -  memlock.*" line="*  -  memlock {{ memlock }}"
+

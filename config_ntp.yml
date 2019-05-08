@@ -1,0 +1,36 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    config_file: "/etc/chrony.conf"
+    ntp_server: "132.96.252.12"
+
+  tasks:
+  - name: 安装ntpdate
+    yum: name=ntpdate state=present
+
+  - name: 同步时间
+    shell: ntpdate {{ ntp_server }}
+    ignore_errors: yes
+
+  - name: 同步硬件时钟
+    shell: /sbin/hwclock --systohc
+
+  - name: 注释server {{ item }}.rhel.pool.ntp.org iburst
+    lineinfile:  dest={{ config_file }}   regexp='^server {{ item }}.rhel.pool.ntp.org.*' line='#server {{ item }}.rhel.pool.ntp.org iburst'
+    with_items:
+      - "0"
+      - "1"
+      - "2"
+      - "3"
+
+  - name: 检测{{ config_file }}是否配置{{ ntp_server }}时间同步
+    shell: grep "^server {{ ntp_server }} iburst" /etc/chrony.conf | wc -l
+    register: ntp_server_count
+
+  - name: 配置ntp_server{{ ntp_server }}时间同步
+    shell: echo "server {{ ntp_server }} iburst" >> /etc/chrony.conf
+    when: ntp_server_count.stdout == "0"

@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    host_list: ""
+    port_list: ""
+
+  tasks:
+    - name: 端口检测
+      shell: /usr/bin/python /data/scripts/python/telnet.py  {{ host_list }}  {{ port_list }}
+      when: host_list != "" and port_list != ""
+      run_once: true
+      delegate_to: 192.168.126.128
+      register: result
+
+    - debug: var=result verbosity=0

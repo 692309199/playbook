@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    somaxconn: "32768"
+    config_file: "/etc/sysctl.conf"
+
+  tasks:
+    - name: 临时设置网络最大的连接配置
+      shell: sysctl -w net.core.somaxconn={{ somaxconn }}
+
+    - name: 永久设置网络最大的连接配置
+      lineinfile: dest={{ config_file }} regexp='^net.core.somaxconn.*' line='net.core.somaxconn = {{ somaxconn }}' 
+
+    - name: 配置生效
+      shell: sysctl -p

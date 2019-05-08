@@ -1,0 +1,46 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    serverid: "RedHat7.3"
+    repo_name: "rhel7.3"
+    baseurl: "ftp://132.96.178.39/pub/rhel7.3"
+    enabled: "1"
+    gpgcheck: "1"
+    gpgkey: ""
+    repo_file_name: "RedHat7.repo"
+
+  tasks:
+    - name: 检测repo文件是否存在
+      shell: ls /etc/yum.repos.d/{{ repo_file_name }} | wc -l 
+      register: file_count
+      failed_when: file_count.stdout != "0"
+
+    - name: 设置serviceid {{ serverid }}
+      shell: echo "[{{ serverid }}]" >> /etc/yum.repos.d/{{ repo_file_name }}
+
+    - name: 设置name {{ repo_name }}
+      shell: echo "name = {{ repo_name }}" >> /etc/yum.repos.d/{{ repo_file_name }}
+
+    - name: 设置baseurl {{ baseurl }}
+      shell: echo "baseurl = {{ baseurl }}" >> /etc/yum.repos.d/{{ repo_file_name }}
+
+    - name: 设置启用repo
+      shell: echo "enabled = {{ enabled }}" >> /etc/yum.repos.d/{{ repo_file_name }}
+
+    - name: 设置gpgcheck
+      shell: echo "gpgcheck = {{ gpgcheck }}" >> /etc/yum.repos.d/{{ repo_file_name }}
+
+    - name: 设置gpgkey
+      shell: echo "gpgkey = {{ gpgkey }}" >> /etc/yum.repos.d/{{ repo_file_name }}
+      when: gpgkey != ""
+
+    - name: 设置gpgkey
+      shell: echo "gpgkey = ftp://132.96.178.39/pub/rhel7.3/RPM-GPG-KEY-redhat-release" >> /etc/yum.repos.d/{{ repo_file_name }}
+      when: baseurl == "ftp://132.96.178.39/pub/rhel7.3"
+
+    - name: 执行yum clean all
+      shell: yum clean all

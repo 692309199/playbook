@@ -1,0 +1,21 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    config_file: "/etc/sysconfig/i18n"
+
+  tasks:
+    - name: 检查/创建配置文件
+      file: path={{ config_file }} state=touch
+
+    - name: 配置LANG="en_US.UTF-8"
+      lineinfile: dest={{ config_file }} regexp='^LANG=.*' line='LANG="en_US.UTF-8"'
+
+    - name: 配置SYSFONT="latarcyrheb-sun16"
+      lineinfile: dest={{ config_file }} regexp='^SYSFONT=.*' line='SYSFONT="latarcyrheb-sun16"'
+
+    - name: 配置SUPPORTED="zh_CN.GB18030:zh_CN:zh:zh_CN.GB2312:en_US.UTF-8:en_US:en"
+      lineinfile: dest={{ config_file }} regexp='^SUPPORTED=.*' line='SUPPORTED="zh_CN.GB18030:zh_CN:zh:zh_CN.GB2312:en_US.UTF-8:en_US:en"'

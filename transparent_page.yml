@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+    - name: redhat大内存配置
+      shell: exec {{ item }}
+      with_items:
+        - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+        - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
+        - "echo 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' >> /etc/rc.local"
+        - "echo 'echo never > /sys/kernel/mm/transparent_hugepage/defrag' >> /etc/rc.local"
+      when: ansible_distribution == "RedHat" 
+
+    - name: Centos大内存配置
+      shell: exec {{ item }}
+      with_items:
+        - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+        - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
+        - "echo 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' >> /etc/rc.local"
+        - "echo 'echo never > /sys/kernel/mm/transparent_hugepage/defrag' >> /etc/rc.local"
+      when: ansible_distribution == "Centos" 
