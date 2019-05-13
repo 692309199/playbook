@@ -1,0 +1,30 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    pacth_file: ""
+    pacth_file_path: ""
+    install_path: ""
+    install_file: ""
+    local_path: ""
+    local_file: ""
+
+  tasks:
+    - name: 参数检查
+      shell: echo "参数检测通过"
+      failed_when: pacth_file == "" or  pacth_file_path == "" or install_path == "" or  install_file == "" or local_path == "" or local_file == ""
+
+    - name: 安装patch
+      yum: name=patch state=present
+
+    - name: 补丁文件上传
+      synchronize: src={{ local_path }}{{ local_file }}  dest={{ pacth_file_path }}{{ pacth_file }}
+
+    - name: 脚本分发
+      synchronize: src=/data/scripts/shell/patch.sh  dest=/tmp/patch.sh
+
+    - name: 执行补丁脚本
+      shell: chdir=/tmp  /bin/bash patch.sh {{install_path }} {{ install_file }} {{ pacth_file_path }} {{ pacth_file }}

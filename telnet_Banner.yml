@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  
+  tasks:
+  - name: 检测23端口是否启动
+    shell: netstat -tnlp | grep ":::23" | grep systemd  | wc -l
+    register: port_result
+
+  - name: 检测telnet服务是否启动
+    shell: systemctl status telnet.socket | grep "active (listening)" | wc -l
+    register: service_result
+
+  - name: 修改issus/issus.net配置
+    lineinfile: dest={{ item }}  regexp='Authorized users only.*'  line='Authorized users only. All activity may be monitored and reported'
+    with_items:
+      - "/etc/issue"
+      - "/etc/issue.net"
+    when: port_result.stdout == "1" and  service_result.stdout == "1"
+
+  - name: 重启xinetd服务
+    service: name=xinetd state=restarted

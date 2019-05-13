@@ -1,0 +1,34 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    remote_host: ""
+
+  tasks:
+    - name: 检测配置文件是否存在
+      shell: ls /etc/rsyslog.conf | wc -l 
+      register: file_check
+
+    - name: 安全事件日志
+      lineinfile: dest=/etc/rsyslog.conf regexp="^\*.err;kern.debug;daemon.notice \/var\/log\/messages" line="*.err;kern.debug;daemon.notice /var/log/messages" backup=yes
+      when: file_check.stdout == "1"
+
+    - name: 转发日志到远程服务器
+      lineinfile: dest=/etc/rsyslog.conf regexp="\*\.\*    \@{{ remote_host }}" line="*.*    @{{ remote_host }}"  backup=yes
+      when: file_check.stdout == "1" and remote_host != ""
+
+    - name: 重启rsyslog服务
+      service: name=rsyslog state=restarted
+
+    - name: 检查日志文件是否创建
+      file: path=/var/log/messages state=touch
+
+    - name: 日志文件权限配置
+      shell: chmod 640 /var/log/*log 
+
+    - name: 配置listen.conf文件权限
+      file: path=/etc/rsyslog.d/listen.conf mode=640
+      when: file_check.stdout == "1"
