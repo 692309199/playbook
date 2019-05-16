@@ -12,3 +12,4 @@
 
   - name: 临时关闭selinux
     shell: setenforce 0
+    ignore_errors: yes

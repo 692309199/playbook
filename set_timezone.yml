@@ -12,6 +12,13 @@
     shell: ls /usr/share/zoneinfo/{{ timezone }} | wc -l
     register: timezone_count
 
+  - name: 检查/etc/localtime是否存在
+    shell: ls /etc/localtime | wc -l 
+    register: localtime_count
+
+  - name: 删除/etc/localtime
+    shell: rm -f /etc/localtime
+    when: localtime_count.stdout == "1" and timezone_count.stdout == "1"
 
   - name: 设置时区为Shanghai
     shell: cp /usr/share/zoneinfo/{{ timezone }} /etc/localtime

@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    file_name: ""
+
+  tasks:
+  - name: 判断文件是否存在
+    shell: ls {{ file_name }} | wc -l 
+    register: result
+
+  - name: 锁定文件{{ file_name }}
+    shell: chattr -i {{ file_name }}
+    when: file_name != "" and result.stdout == "1"
