@@ -1,0 +1,17 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    host_ip: ""
+    profile_name: ""
+
+  tasks:
+    - name: 指定重装的系统名称
+      shell: koan --replace-self --server={{ host_ip }} --profile={{ profile_name }}
+      when: host_ip != "" and  profile_name != ""
+
+    - name: 重启系统，进行重装
+      shell: reboot

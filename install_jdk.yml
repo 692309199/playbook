@@ -1,0 +1,33 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    jdk_install_path: "/usr/java/"
+    jdk_file_path: "/data/software/"
+    jdk_file: jdk-8u144-linux-x64.tar.gz
+    profile_file: "/etc/profile"
+    java_home: "/usr/java/jdk1.8.0_144"
+    classpath: ".:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar"
+
+  tasks:
+  - name: 创建文件夹
+    file: path={{ jdk_install_path }} state=directory
+
+  - name: 安装包传输
+    copy: src={{ jdk_file_path}}{{ jdk_file }} dest={{ jdk_install_path }}
+
+  - name: 解压安装包
+    shell: chdir={{ jdk_install_path }} tar xf {{ jdk_file }}
+
+  - name: 修改配置文件
+    lineinfile: dest={{ profile_file }}   regexp="^export {{ item.name }}=.*" line="export {{ item.name }}={{ item.Value }}"
+    with_items:
+      - { name: "JAVA_HOME" , Value: "/usr/java/jdk1.8.0_144" }
+      - { name: "PATH" , Value: "$JAVA_HOME/bin:$PATH" }
+      - { name: "CLASSPATH" , Value: ".:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar"}
+
+  - name: 生效配置并检查java版本
+    shell: source /etc/profile && java -version

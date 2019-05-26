@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    host_ip: ""
+
+  tasks:
+    - name: 获取profiles名称
+      shell: koan --server={{ host_ip }} --list=profiles
+      when: host_ip != ""

@@ -1,0 +1,44 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+    - name: 同步文件
+      synchronize: src=/data/software/koan.tgz  dest=/usr/local/src/koan.tgz
+
+    - name: 解压文件
+      unarchive: src=/usr/local/src/koan.tgz dest=/usr/local/src copy=no
+
+    - name: 创建yum.repo备份文件夹
+      file: path=/etc/yum.repos.d/backup state=directory
+
+    - name: 备份repo
+      shell: mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup
+
+    - name: 安装deltarpm
+      shell: chdir=/usr/local/src/koan  rpm -ivh deltarpm-3.6-3.el7.x86_64.rpm
+
+    - name: 安装python-deltarpm
+      shell: chdir=/usr/local/src/koan rpm -ivh  python-deltarpm-3.6-3.el7.x86_64.rpm
+
+    - name: 安装createrepo
+      shell: chdir=/usr/local/src/koan rpm -ivh createrepo-0.9.9-28.el7.noarch.rpm
+
+    - name: 配置koan.repo
+      yum_repository:  file=koan name=koan description=koan.repo baseurl=file:///usr/local/src/koan  enabled=yes gpgcheck=no state=present
+
+    - name: 创建repo
+      shell: createrepo  /usr/local/src/koan/
+
+    - name: clean yum.repo
+      shell: yum clean all
+
+    - name: yum repolist
+      shell: yum repolist
+
+    - name: 安装koan
+      yum: name=koan state=present
+
