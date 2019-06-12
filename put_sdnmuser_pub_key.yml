@@ -14,7 +14,7 @@
     shell: cat /home/sdnmuser/.ssh/id_rsa.pub
 #    connection: local
     run_once: true
-    delegate_to: 192.168.126.128
+    delegate_to: 172.168.201.41
     register: public_key
 
   - name: 创建.ssh 文件夹

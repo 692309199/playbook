@@ -6,15 +6,11 @@
   become_user: root
   vars:
     scripts_path: "/opt"
-    bond_type: "0"
+    bond_type: ""
     miimon: "100"
-    Ethernet1: ""
-    Ethernet2: ""
-    Ethernet3: ""
-    Ethernet4: ""
-    Ethernet5: ""
-    Ethernet6: ""
-#    cfg_file_path: "/etc/sysconfig/network-scripts/"
+    real1_name: ""
+    real2_name: ""
+    cfg_file_path: "/etc/sysconfig/network-scripts/"
     ipaddress: ""
     PREFIX: ""
     GATEWAY: ""
@@ -24,5 +20,5 @@
 
   tasks:
   - name: 执行网卡绑定
-    shell: chdir={{ scripts_path }} /bin/bash {{ scripts_path }}/bond.sh {{ bond_type }} {{ miimon }} {{ ipaddress }} {{ PREFIX }} {{ GATEWAY }} {{ DNS1 }} {{ DNS2 }} {{ Ethernet1 }} {{ Ethernet2 }} {{  Ethernet3 }} {{ Ethernet4 }} {{ Ethernet5 }} {{ Ethernet6 }}
-    when:  bond_type != "" and ipaddress != "" and PREFIX != "" and GATEWAY != "" and DNS1 != ""
+    shell: chdir={{ scripts_path }} /bin/bash {{ scripts_path }}/bond.sh {{ bond_type }} {{ miimon }} {{ real1_name }} {{ real2_name }} {{ ipaddress }} {{ PREFIX }} {{ GATEWAY }} {{ DNS1 }} {{ DNS2 }}
+    when: real1_name != "" and real2_name != "" and bond_type != "" and ipaddress != "" and PREFIX != "" and GATEWAY != "" and DNS1 != ""
