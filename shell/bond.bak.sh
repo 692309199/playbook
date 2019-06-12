@@ -4,28 +4,25 @@
 bond_type=$1
 miimon=$2
 bond_name="bond"$bond_type
+real1_name=$3
+real2_name=$4
 cfg_file_path='/etc/sysconfig/network-scripts/'
 bond_config_file="ifcfg-"$bond_name
-ipaddress=$3
-PREFIX=$4
-GATEWAY=$5
-DNS1=$6
-DNS2=$7
+real_config_file1="ifcfg-"$real1_name
+real_config_file2="ifcfg-"$real2_name
+ipaddress=$5
+PREFIX=$6
+GATEWAY=$7
+DNS1=$8
+DNS2=$9
 bonding_modules="/etc/sysconfig/modules/bonding.modules"
-
-#ifcfg配置文件备份文件夹
-backup_dir="/etc/sysconfig/network-scripts/backup/"
-
-[[ -d $backup_dir ]] || mkdir -p $backup_dir
-
-#判断DNS2是否有传入参数,否则赋空值
-[[ $DNS2 == "0" ]] && DNS2=""
 
 #备份文件
 now_time=`date +"%Y%m%d%H%M%S" `
-[[ -f $cfg_file_path$ifcfg-$bond_name ]] && cp $cfg_file_path$ifcfg-$bond_name $backup_dir$ifcfg-$bond_name$now_time
+[[ -f $cfg_file_path$bond_name ]] && cp $cfg_file_path$bond_name $cfg_file_path$bond_name$now_time
+[[ -f $cfg_file_path$real1_name ]] && cp $cfg_file_path$real1_name $cfg_file_path$real1_name$now_time
+[[ -f $cfg_file_path$real2_name ]] && cp $cfg_file_path$real2_name $cfg_file_path$real2_name$now_time
 
-#绑定bond0
 (
 cat <<EOF
 BOOTPROTO=static
@@ -43,27 +40,31 @@ DNS2=$DNS2
 EOF
 ) > $cfg_file_path$bond_config_file
 
-#绑定网卡
-count=0
-for i in $*
-do 
-	count=`expr $count + 1`
-	if [[ $count -gt 7 ]]; then
-		config_file=ifcfg-$i
-		[[ -f $cfg_file_path$config_file ]] && cp $cfg_file_path$config_file $backup_dir$config_file$now_time
-		(
+(
 cat <<EOF
 TYPE=Ethernet
 BOOTPROTO=none
-DEVICE=$i
-NAME=$i
+DEVICE=$real1_name
+NAME=$real1_name
 ONBOOT=yes
+#MASTER=$bond_name
 MASTER=bond0
 SLAVE=yes
 EOF
-) > $cfg_file_path$config_file
-	fi
-done
+) > $cfg_file_path$real_config_file1
+
+(
+cat <<EOF
+TYPE=Ethernet
+BOOTPROTO=none
+DEVICE=$real2_name
+NAME=$real2_name
+ONBOOT=yes
+#MASTER=$bond_name
+MASTER=bond0
+SLAVE=yes
+EOF
+) > $cfg_file_path$real_config_file2
 
 
 #如果没有则创建
@@ -75,4 +76,3 @@ config_count=`grep "^modprobe bonding" /etc/rc.d/rc.local | wc -l`
 [[ $config_count -eq 0 ]] && echo "modprobe bonding" >> /etc/rc.d/rc.local
 modprobe bonding
 systemctl restart network
-rm -f $0

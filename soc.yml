@@ -1,0 +1,32 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: 创建安装目录
+    file: path=/usr/local/sa state=directory
+
+  - name: 拷贝SA.cert证书文件
+    copy: src=/data/soc/SA.cert dest=/usr/local/sa/SA.cert
+
+  - name: 分发sa_agent的安装包
+    copy: src=/data/soc/sa-agent-linux64.tar.gz dest=/usr/local/sa/
+
+  - name: 安装sa_agent
+    shell: chdir=/usr/local/sa/  tar -zxf sa-agent-linux64.tar.gz 
+    ignore_errors: yes
+
+  - name: 创建cron备份目录
+    file: path=/root/cron_bak state=directory
+
+  - name: 备份定时计划任务
+#    file: path=/root/cron_bak state=directory
+    shell: cp -pr /var/spool/cron /root/cron_bak/
+
+  - name: 启动sa_agent服务
+    shell: chdir=/usr/local/sa/sa-agent/bin/   ./server.sh start
+
+  - name: 检查sa_agent服务
+    shell: chdir=/usr/local/sa/sa-agent/bin/ ./checkAsset.sh 
