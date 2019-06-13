@@ -7,7 +7,8 @@
 
   tasks:
     - name: 同步文件
-      synchronize: src=/data/software/koan.tgz  dest=/usr/local/src/koan.tgz
+      #synchronize: src=/data/software/koan.tgz  dest=/usr/local/src/koan.tgz
+      copy: src=/data/software/koan.tgz  dest=/usr/local/src/koan.tgz
 
     - name: 解压文件
       unarchive: src=/usr/local/src/koan.tgz dest=/usr/local/src copy=no
@@ -17,6 +18,7 @@
 
     - name: 备份repo
       shell: mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup
+      ignore_errors: yes
 
     - name: 安装deltarpm
       shell: chdir=/usr/local/src/koan  rpm -ivh deltarpm-3.6-3.el7.x86_64.rpm
