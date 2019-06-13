@@ -22,12 +22,16 @@
 
     - name: 安装deltarpm
       shell: chdir=/usr/local/src/koan  rpm -ivh deltarpm-3.6-3.el7.x86_64.rpm
+      ignore_errors: yes
+
 
     - name: 安装python-deltarpm
       shell: chdir=/usr/local/src/koan rpm -ivh  python-deltarpm-3.6-3.el7.x86_64.rpm
+      ignore_errors: yes
 
     - name: 安装createrepo
       shell: chdir=/usr/local/src/koan rpm -ivh createrepo-0.9.9-28.el7.noarch.rpm
+      ignore_errors: yes
 
     - name: 配置koan.repo
       yum_repository:  file=koan name=koan description=koan.repo baseurl=file:///usr/local/src/koan  enabled=yes gpgcheck=no state=present
