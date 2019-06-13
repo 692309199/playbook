@@ -1,0 +1,79 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    zabbix_version: "4.0.2"
+    zabbix_server: "192.168.60.45"
+
+  tasks:
+  - name: 安装gcc
+    yum: name=gcc state=present
+
+  - name: 安装pcre-devel
+    yum: name=pcre-devel state=present
+
+  - name: 创建zabbix用户组
+    group: name=zabbix state=present
+
+  - name: 创建zabbix用户
+    user: name=zabbix   group=zabbix shell=/sbin/nologin
+
+  - name: zabbix_agent安装包分发
+    copy: src=/data/software/zabbix/zabbix-{{ zabbix_version }}.tar.gz dest=/usr/local/src/
+
+  - name: 解压安装包
+    shell: chdir=/usr/local/src/  tar zxf zabbix-{{ zabbix_version }}.tar.gz
+
+  - name: 编译
+    shell: chdir=/usr/local/src/zabbix-{{ zabbix_version }} ./configure --enable-agent
+
+  - name: 安装
+    shell: chdir=/usr/local/src/zabbix-{{ zabbix_version }} make install
+
+  - name: 备份zabbix_agent.conf
+    shell: cp /usr/local/etc/zabbix_agentd.conf /usr/local/etc/zabbix_agentd.conf.bak
+
+  - name: 获取主机名
+    shell: hostname
+    register: hostname
+
+  - name: 修改zabbix_agentd.conf
+    lineinfile: dest=/usr/local/etc/zabbix_agentd.conf regexp="^Server=.*" line="Server={{ zabbix_server }}"
+  
+  - lineinfile: dest=/usr/local/etc/zabbix_agentd.conf regexp="^Hostname=.*" line="Hostname={{ hostname.stdout }}"
+  - lineinfile: dest=/usr/local/etc/zabbix_agentd.conf regexp="^ListenIP=.*" line="ListenIP=0.0.0.0"
+  - lineinfile: dest=/usr/local/etc/zabbix_agentd.conf regexp="^ServerActive=.*" line="ServerActive={{ zabbix_server }}:10051"
+  - lineinfile: dest=/usr/local/etc/zabbix_agentd.conf regexp="^PidFile=.*" line="PidFile=/var/run/zabbix/zabbix_agentd.pid"
+  - lineinfile: dest=/usr/local/etc/zabbix_agentd.conf regexp="^LogFile=.*" line="LogFile=/var/log/zabbix/zabbix_agentd.log"
+
+  - name: 创建pid文件夹并授权
+    file:  path=/var/run/zabbix state=directory group=zabbix owner=zabbix
+
+  - name: 创建日志文件夹并授权
+    file: path=/var/log/zabbix state=directory group=zabbix owner=zabbix
+
+  - name: 拷贝启动程序
+    shell: cp /usr/local/src/zabbix-{{ zabbix_version }}/misc/init.d/fedora/core/zabbix_agentd /etc/init.d/
+
+  - name: 修改/etc/init.d/zabbix_agentd
+    lineinfile: dest=/etc/init.d/zabbix_agentd  regexp="PIDFILE=.*" line="PIDFILE=/var/run/zabbix/$BINARY_NAME.pid"
+
+  - name: 授权/etc/init.d/zabbix_agentd
+    file: path=/etc/init.d/zabbix_agentd mode=755
+
+  - name: 启动zabbx_agent
+    shell: /etc/init.d/zabbix_agentd start
+
+  - name: 检查zabbix_agent状态
+    shell: /etc/init.d/zabbix_agentd status
+
+  - name: 开放防火墙10050端口
+    shell:  firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0  -s {{ zabbix_server }} -p tcp --dport 10050 -j ACCEPT
+    ignore_errors: yes
+
+  - name: 重新加载firewall
+    shell: firewall-cmd --reload
+    ignore_errors: yes
