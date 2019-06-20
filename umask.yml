@@ -13,5 +13,5 @@
     register: umask_code
 
   - name: 配置umask
-    shell: echo "umask 027" >> /etc/profile
+    shell: echo "umask 027" >> /etc/profile  && source /etc/profile
     when: umask_code.stdout == "0"
