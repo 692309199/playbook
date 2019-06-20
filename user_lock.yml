@@ -28,6 +28,7 @@
       - tss
       - postfix
       - sshd
+    ignore_errors: yes
 
   - name: 修改用户的域
     shell: usermod -s /bin/false "{{ item }}"
@@ -51,3 +52,4 @@
       - tss
       - postfix
       - sshd
+    ignore_errors: yes
