@@ -8,10 +8,11 @@
     script_src_path: ""
     script_dest_path: ""
     args1: ""
+    args2: ""
     log_path: "/home/sdnmuser/CPXF_LOAD_FSIMAGE.log"
   tasks:
   - name: 分发脚本
     template: src={{ script_src_path }} dest={{ script_dest_path }}
 
   - name: 执行脚本
-    shell: /bin/bash {{ script_dest_path }} {{ args1 }} > {{ log_path }} &
+    shell: /bin/bash {{ script_dest_path }} {{ args1 }} {{ args2 }} > {{ log_path }} &
