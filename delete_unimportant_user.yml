@@ -20,3 +20,4 @@
        - "smmsp"
        - "nfsnobody"
        - "nobody"
+    ignore_errors: yes
