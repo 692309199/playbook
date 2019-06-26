@@ -5,7 +5,6 @@
   become_method: sudo
   become_user: root
   vars:
-    scripts_path: "/opt"
     bond_type: "0"
     miimon: "100"
     Ethernet1: ""
@@ -14,15 +13,27 @@
     Ethernet4: ""
     Ethernet5: ""
     Ethernet6: ""
-#    cfg_file_path: "/etc/sysconfig/network-scripts/"
     ipaddress: ""
     PREFIX: ""
     GATEWAY: ""
     DNS1: ""
     DNS2: ""
-    bonding_modules: "/etc/sysconfig/modules/bonding.modules"
+    max_bond: "2"
+    cfg_file: "/etc/modprob.conf"
 
   tasks:
+  - name: 检测{{ cfg_file }}是否存在
+    file: path={{ cfg_file }} state=touch
+
+  - name: 配置最大的bond值
+    lineinfile: dest={{ cfg_file }}   regexp='options bonding max_bonds.*' line='options bonding max_bonds={{ max_bond }}'
+
+  - name: 配置alias
+    lineinfile: dest={{ cfg_file }} regexp='alias bond{{ bond_type }}.*' line='alias bond{{ bond_type }} bonding'
+
   - name: 执行网卡绑定
-    shell: chdir={{ scripts_path }} /bin/bash {{ scripts_path }}/bond.sh {{ bond_type }} {{ miimon }} {{ ipaddress }} {{ PREFIX }} {{ GATEWAY }} {{ DNS1 }} {{ DNS2 }} {{ Ethernet1 }} {{ Ethernet2 }} {{  Ethernet3 }} {{ Ethernet4 }} {{ Ethernet5 }} {{ Ethernet6 }}
+    script: /data/scripts/shell/bond.sh {{ bond_type }} {{ miimon }} {{ ipaddress }} {{ PREFIX }} {{ GATEWAY }} {{ DNS1 }} {{ DNS2 }} {{ Ethernet1 }} {{ Ethernet2 }} {{  Ethernet3 }} {{ Ethernet4 }} {{Ethernet5 }} {{ Ethernet6 }}
     when:  bond_type != "" and ipaddress != "" and PREFIX != "" and GATEWAY != "" and DNS1 != ""
+    #async: 10
+    #poll: 2
+    ignore_errors: yes
