@@ -41,7 +41,7 @@ GATEWAY=$GATEWAY
 DNS1=$DNS1
 DNS2=$DNS2
 USERCTL=no
-BONDING_OPTS="mode=1 miimon=100"
+BONDING_OPTS="mode=$bond_type miimon=100"
 EOF
 ) > $cfg_file_path$bond_config_file
 
