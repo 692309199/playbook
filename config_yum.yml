@@ -8,45 +8,29 @@
     serverid: "RedHat7.3"
     repo_name: "rhel7.3"
     baseurl: "ftp://132.96.178.39/pub/rhel7.3"
-    enabled: "1"
-    gpgcheck: "1"
+    enabled: "yes"
+    gpgcheck: "yes"
     gpgkey: ""
-    repo_file_name: "RedHat7.repo"
+    repo_file_name: "RedHat7"
+
+    # #######       用户提供的仓库地址           #########
+    # serverid: "repo for RedHat7.3"
+    # repo_name: "rhel7.3"
+    # baseurl: "http://132.122.137.3/RedHat/7/iso/RedHat7.3"
+    # enabled: "yes"
+    # gpgcheck: "yes"
+    # gpgkey: ""
+    # repo_file_name: "RedHat7"
+
 
   tasks:
     - name: 检测repo文件是否存在
-      shell: ls /etc/yum.repos.d/{{ repo_file_name }} | wc -l 
+      shell: ls /etc/yum.repos.d/{{ repo_file_name }}.repo | wc -l 
       register: file_count
       failed_when: file_count.stdout != "0"
 
-    - name: 创建备份文件夹
-      shell: mkdir -p /etc/yum.repos.d/backup
-
-    - name: 备份repo文件
-      shell: mv /etc/yum.repos.d/*.repo  /etc/yum.repos.d/backup/
-
-    - name: 设置serviceid {{ serverid }}
-      shell: echo "[{{ serverid }}]" >> /etc/yum.repos.d/{{ repo_file_name }}
-
-    - name: 设置name {{ repo_name }}
-      shell: echo "name = {{ repo_name }}" >> /etc/yum.repos.d/{{ repo_file_name }}
-
-    - name: 设置baseurl {{ baseurl }}
-      shell: echo "baseurl = {{ baseurl }}" >> /etc/yum.repos.d/{{ repo_file_name }}
-
-    - name: 设置启用repo
-      shell: echo "enabled = {{ enabled }}" >> /etc/yum.repos.d/{{ repo_file_name }}
-
-    - name: 设置gpgcheck
-      shell: echo "gpgcheck = {{ gpgcheck }}" >> /etc/yum.repos.d/{{ repo_file_name }}
-
-    - name: 设置gpgkey
-      shell: echo "gpgkey = {{ gpgkey }}" >> /etc/yum.repos.d/{{ repo_file_name }}
-      when: gpgkey != ""
-
-    - name: 设置gpgkey
-      shell: echo "gpgkey = ftp://132.96.178.39/pub/rhel7.3/RPM-GPG-KEY-redhat-release" >> /etc/yum.repos.d/{{ repo_file_name }}
-      when: baseurl == "ftp://132.96.178.39/pub/rhel7.3"
+    - name: 配置yum
+      yum_repository:  file={{ repo_file_name }} name={{ serverid }} description={{ repo_name }} baseurl={{ baseurl }}  enabled={{ enabled }} gpgcheck={{ gpgcheck }} gpgkey={{ gpgkey }} state=present
 
     - name: 执行yum clean all
       shell: yum clean all
