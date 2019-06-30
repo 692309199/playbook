@@ -9,7 +9,7 @@
       - "192.168.126.1   test01"
       - "192.168.126.2   test02"
       - "192.168.126.3   test03"
-    temp_file: "/etc/hosts"
+    temp_file: "/tmp/hosts"
   tasks:
   - name: template
     template: src=/var/lib/awx/projects/redhat7.3/template/hosts.j2 dest={{ temp_file }}
