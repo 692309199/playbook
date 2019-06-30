@@ -11,3 +11,7 @@
       - "192.168.126.3   test03"
   tasks:
   - name: 配置hosts
+    {% for i in commands %} 
+      dest=/etc/hosts  regexp={{ i }} line={{ i }} 
+    {% endfor %}
+    when: commands != ""
