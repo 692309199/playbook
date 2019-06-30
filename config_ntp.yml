@@ -9,6 +9,12 @@
     ntp_server: "132.96.252.12"
 
   tasks:
+  - name: 安装chrony
+    yum: name=chrony state=present
+
+  - name: 启动chrony
+    service: name=chronyd state=started
+
   - name: 安装ntp
     yum: name=ntp state=present
 

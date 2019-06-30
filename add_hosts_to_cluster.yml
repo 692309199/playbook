@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    hname: ""
+    hip: ""
+
+  tasks:
+    - name: 追加新增节点到集群其他节点的hosts
+      lineinfile: dest=/etc/hosts  regexp="{{ hip }}   {{ hname }}" line="{{ hip }}   {{ hname }}" backup=yes
+      when: hname != "" and hip != ""
