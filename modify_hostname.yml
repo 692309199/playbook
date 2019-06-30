@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    hname: ""
+
+  tasks:
+    - name: 修改主机名
+      hostname: name={{ hname }}
+      when: hname != ""
