@@ -12,7 +12,7 @@
     temp_file: "/etc/hosts"
   tasks:
   - name: template
-    template: src=hosts.j2 dest={{ temp_file }}
+    template: src=/var/lib/awx/projects/redhat7.3/template/hosts.j2 dest={{ temp_file }}
 
   - name: 配置hosts
     shell: cat {{ temp_file }} >> /etc/hosts
