@@ -12,7 +12,7 @@
     temp_file: "/etc/hosts"
   tasks:
   - name: template
-    template: src=hosts.js dest={{ temp_file }}
+    template: src=hosts.j2 dest={{ temp_file }}
 
   - name: 配置hosts
     shell: cat {{ temp_file }} >> /etc/hosts
