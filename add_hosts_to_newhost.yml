@@ -5,13 +5,17 @@
   become_method: sudo
   become_user: root
   vars:
-    contents: "192.168.126.1   test01\n192.168.126.2   test02\n192.168.126.3   test03"
-
+    host_info: 
+      - "192.168.126.1   test01"
+      - "192.168.126.2   test02"
+      - "192.168.126.3   test03"
+    temp_file: "/etc/hosts"
   tasks:
+  - name: template
+    template: src=hosts.js dest={{ temp_file }}
+
   - name: 配置hosts
-    blockinfile: path=/etc/hosts block={{ contents }} state=present
-  # - name: 配置hosts
-  #   {% for i in commands %} 
-  #     dest=/etc/hosts  regexp={{ i }} line={{ i }} 
-  #   {% endfor %}
-  #   when: commands != ""
+    shell: cat {{ temp_file }} >> /etc/hosts
+
+  - name: 删除临时文件
+    file: path={{ temp_file }} state=absent
