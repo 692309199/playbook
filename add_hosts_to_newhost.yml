@@ -5,16 +5,11 @@
   become_method: sudo
   become_user: root
   vars:
-    commands: 
-      - "192.168.126.1   test01"
-      - "192.168.126.2   test02"
-      - "192.168.126.3   test03"
-  tasks:
-  - name: template
-    template: src=hosts.js dest=/tmp/hosts
+    contents: "192.168.126.1   test01\n192.168.126.2   test02\n192.168.126.3   test03"
 
+  tasks:
   - name: 配置hosts
-    shell: cat /tmp/hosts >> /etc/hosts
+    blockinfile: path=/etc/hosts block={{ contents }} state=present
   # - name: 配置hosts
   #   {% for i in commands %} 
   #     dest=/etc/hosts  regexp={{ i }} line={{ i }} 
