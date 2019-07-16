@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    disk_list:
+      - "/dev/sda"
+      - "/dev/sdb"
+      - "/dev/sdc"
+
+  tasks:
+  - name: 磁盘挂载检测
+    shell: " {% for i in disk_list %} [[ `cat /etc/fstab  | grep '^{{ i }}' | wc -l` -ge 1  ]] && echo '{{ i }}配置成功' || echo '{{ i }}配置失败' \n {% endfor %}"
+    when: disk_list != ""
+
+  - name: fstab文件检查
+    shell: cat /etc/fstab 

@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    disk_list:
+      - "sda"
+      - "sdb"
+  tasks:
+  - name: 磁盘挂载检测
+    shell: " {% for i in disk_list %} [[ `df -h  | grep {{ i }} | wc -l` -ge 1  ]] && echo '{{ i }}挂载成功' || echo '{{ i }}挂载失败' \n {% endfor %}"
+    when: disk_list != ""

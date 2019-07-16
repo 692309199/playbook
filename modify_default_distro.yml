@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    distro: ""
+
+  tasks:
+  - name: 修改cobbler server 默认安装的镜像  
+    lineinfile: dest=/var/lib/tftpboot/pxelinux.cfg/default regexp="^ONTIMEOUT.*" line="ONTIMEOUT {{ distro }}" backrefs=yes
+    when: distro != ""

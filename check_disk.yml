@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    disk_list:
+      - "/opt"
+      - "/tmp"
+  tasks:
+  - name: 检测分区写性能
+    shell: " {% for i in disk_list %} echo 'now is checking write {{ i }}'  && dd if=/dev/zero of={{ i }}/iotest  bs=8k count=102400 \n {% endfor %}"
+    when: disk_list != ""
+
+  - name: 检测分区读性能
+    shell: " {% for i in disk_list %} echo 'now is checking read {{ i }}' &&  dd if={{ i }}/iotest of=/dev/null \n {% endfor %}"
+    when: disk_list != ""
